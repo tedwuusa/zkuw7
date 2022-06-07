@@ -1,0 +1,23 @@
+{
+  "name": "fusion-credit",
+  "version": "1.0.0",
+  "description": "A credit system based on multiple accounts while keeping account info private",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tedwuusa/fusion-credit.git"
+  },
+  "keywords": [],
+  "author": "Ted Wu",
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/tedwuusa/fusion-credit/issues"
+  },
+  "homepage": "https://github.com/tedwuusa/fusion-credit#readme",
+  "devDependencies": {
+    "circomlib": "^2.0.3"
+  }
+}
