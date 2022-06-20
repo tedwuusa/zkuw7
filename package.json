@@ -4,7 +4,11 @@
   "description": "A credit system based on multiple accounts while keeping account info private",
   "main": "index.js",
   "scripts": {
-    "test": "npx hardhat test"
+    "test": "npx hardhat test",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "repository": {
     "type": "git",
@@ -17,11 +21,18 @@
     "url": "https://github.com/tedwuusa/fusion-credit/issues"
   },
   "homepage": "https://github.com/tedwuusa/fusion-credit#readme",
+  "dependencies": {
+    "next": "12.1.6",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.6",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "chai": "^4.3.6",
     "circomlib": "^2.0.3",
+    "eslint": "8.18.0",
+    "eslint-config-next": "12.1.6",
     "ethereum-waffle": "^3.4.4",
     "ethers": "^5.6.8",
     "hardhat": "^2.9.9"
