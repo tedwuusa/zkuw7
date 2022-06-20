@@ -2,26 +2,20 @@
   "name": "fusion-credit",
   "version": "1.0.0",
   "description": "A credit system based on multiple accounts while keeping account info private",
+  "license": "GPLv3",
   "main": "index.js",
   "scripts": {
+    "compile": "npx hardhat compile",
+    "deploy": "npx hardhat deploy",
     "test": "npx hardhat test",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/tedwuusa/fusion-credit.git"
-  },
-  "keywords": [],
-  "author": "Ted Wu",
-  "license": "GPLv3",
-  "bugs": {
-    "url": "https://github.com/tedwuusa/fusion-credit/issues"
-  },
-  "homepage": "https://github.com/tedwuusa/fusion-credit#readme",
   "dependencies": {
+    "@web3-react/core": "^6.1.9",
+    "@web3-react/injected-connector": "^6.0.7",
     "next": "12.1.6",
     "react": "18.2.0",
     "react-dom": "18.2.0"
