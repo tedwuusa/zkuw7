@@ -8,6 +8,11 @@ body {
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
 
+p {
+  margin: 0.3em;
+  font-size: 1.2em;
+}
+
 a {
   color: #7FB3F1;
   text-decoration: none;
