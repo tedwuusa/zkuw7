@@ -1,7 +1,7 @@
 {
   "name": "fusion-credit",
   "version": "1.0.0",
-  "description": "A credit system based on multiple accounts while keeping account info private",
+  "description": "Universal reputation score with privacy in mind",
   "license": "GPLv3",
   "main": "index.js",
   "scripts": {
