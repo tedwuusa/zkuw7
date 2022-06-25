@@ -33,11 +33,11 @@ module.exports = {
     },
     "polygon-mumbai": {
       url: "https://rpc-mumbai.maticvigil.com",
-      accounts: [process.env.PRIVATE_KEY]
+      accounts: [process.env.DEPLOYER_ADDRESS]
     },
     "polygon-mainnet": {
       url: "https://rpc-mainnet.maticvigil.com",
-      accounts: [process.env.PRIVATE_KEY]
+      accounts: [process.env.DEPLOYER_ADDRESS]
     },       
   }
 };
