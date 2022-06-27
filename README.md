@@ -9,7 +9,7 @@ This project is currently deployed to [Harmony DevNet](https://explorer.ps.hmny.
 
 Link to client app:
 
-<https://zkgames.vercel.app/>
+<https://fusioncredit.vercel.app/>
 
 ## Setup
 
