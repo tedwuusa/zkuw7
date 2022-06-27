@@ -7,6 +7,7 @@ interface IVerifier {
 }
 
 contract FusionCredit {
+    address owner;
     IVerifier public verifier;
     mapping(address => ScoreData) public scores;
 
@@ -16,11 +17,17 @@ contract FusionCredit {
         uint48 timestamp;
     }
 
+   modifier onlyOwner {
+      require(msg.sender == owner);
+      _;
+   }
+
     constructor(IVerifier _verifier) {
+        owner = msg.sender;
         verifier = _verifier;
     }
 
-    function setVerifier(IVerifier _verifier) public {
+    function setVerifier(IVerifier _verifier) public onlyOwner {
         verifier = _verifier;
     }
 
@@ -35,7 +42,7 @@ contract FusionCredit {
         ScoreData memory scoreData = scores[msg.sender];
         require(version >= scoreData.version, "Can't use earlier version");
         require(timestamp > scoreData.timestamp, "Can't use earlier timestamp");
-        require(timestamp <= block.timestamp, "Can't use future timestamp");
+//        require(timestamp <= block.timestamp, "Can't use future timestamp");
 
         uint[3] memory input = [score, version, timestamp];
         uint[2] memory a = [proof[0], proof[1]];

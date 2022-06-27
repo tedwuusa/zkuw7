@@ -14,8 +14,34 @@ export default function handler(req, res) {
       "is_testnet": true,
       "db_schema_name": "chain_eth_kovan",
       "label": "Ethereum Testnet Kovan",
-      "logo_url": "https://www.covalenthq.com/static/images/icons/display-icons/ethereum-eth-logo.png"
+      "logo_url": "https://www.covalenthq.com/static/images/icons/display-icons/ethereum-eth-logo.png",
+      "fusion_score_contract": "0xc33B93EC3E220A4B6d1BA0a74FDEA23bBf9db099"
     },
+    {
+      "name": "harmony-mainnet",
+      "chain_id": "1666600000",
+      "is_testnet": false,
+      "db_schema_name": "chain_harmony_mainnet",
+      "label": "Harmony Mainnet",
+      "logo_url": "https://www.covalenthq.com/static/images/icons/display-icons/harmony-logo.svg"
+    },
+    {
+      "name": "harmony-testnet",
+      "chain_id": "1666700000",
+      "is_testnet": true,
+      "db_schema_name": "chain_harmony_testnet",
+      "label": "Harmony Testnet",
+      "logo_url": "https://www.covalenthq.com/static/images/icons/display-icons/harmony-logo.svg"
+    },
+    {
+      "name": "harmony-devnet",
+      "chain_id": "1666900000",
+      "is_testnet": true,
+      "db_schema_name": "chain_harmony_testnet",
+      "label": "Harmony Devnet",
+      "logo_url": "https://www.covalenthq.com/static/images/icons/display-icons/harmony-logo.svg",
+      "fusion_score_contract": "0x285D888883D1230bD843B38428bE484fA620F46E"
+    },      
     {
       "name": "matic-mainnet",
       "chain_id": "137",
@@ -239,22 +265,6 @@ export default function handler(req, res) {
       "db_schema_name": "chain_iotex_testnet",
       "label": "IoTeX Testnet",
       "logo_url": "https://www.covalenthq.com/static/images/icons/display-icons/iotex-logo.svg"
-    },
-    {
-      "name": "harmony-mainnet",
-      "chain_id": "1666600000",
-      "is_testnet": false,
-      "db_schema_name": "chain_harmony_mainnet",
-      "label": "Harmony Mainnet",
-      "logo_url": "https://www.covalenthq.com/static/images/icons/display-icons/harmony-logo.svg"
-    },
-    {
-      "name": "harmony-testnet",
-      "chain_id": "1666700000",
-      "is_testnet": false,
-      "db_schema_name": "chain_harmony_testnet",
-      "label": "Harmony Testnet",
-      "logo_url": "https://www.covalenthq.com/static/images/icons/display-icons/harmony-logo.svg"
     },
     {
       "name": "aurora-mainnet",

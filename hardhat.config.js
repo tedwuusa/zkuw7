@@ -15,29 +15,32 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 module.exports = {
   solidity: "0.8.4",
   networks: {
-    "harmony-testnet": {
-      url: `https://api.s0.b.hmny.io`,
+    "ethereum-mainnet": {
+      url: "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+      accounts: [process.env.DEPLOYER_ADDRESS]
+    },
+    "ethereum-kovan": {
+      url: "https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
       accounts: [process.env.DEPLOYER_ADDRESS]
     },
     "harmony-mainnet": {
       url: `https://api.harmony.one`,
       accounts: [process.env.DEPLOYER_ADDRESS]
+    },    "harmony-testnet": {
+      url: `https://api.s0.b.hmny.io`,
+      accounts: [process.env.DEPLOYER_ADDRESS]
     },
-    "optimism-kovan": {
-      url: "https://kovan.optimism.io",
-      accounts: [process.env.DEPLOYER_ADDRESS],
-    },
-    "optimism-mainnet": {
-      url: "https://mainnet.optimism.io",
-      accounts: [process.env.DEPLOYER_ADDRESS],
-    },
-    "polygon-mumbai": {
-      url: "https://rpc-mumbai.maticvigil.com",
+    "harmony-devnet": {
+      url: `https://api.s0.ps.hmny.io`,
       accounts: [process.env.DEPLOYER_ADDRESS]
     },
     "polygon-mainnet": {
       url: "https://rpc-mainnet.maticvigil.com",
       accounts: [process.env.DEPLOYER_ADDRESS]
-    },       
+    },
+    "polygon-mumbai": {
+      url: "https://rpc-mumbai.maticvigil.com",
+      accounts: [process.env.DEPLOYER_ADDRESS]
+    },
   }
 };

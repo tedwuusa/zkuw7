@@ -2,10 +2,15 @@ import React from "react"
 import styles from "../styles/Home.module.css"
 import { useWeb3React } from "@web3-react/core";
 import { InjectedConnector } from "@web3-react/injected-connector";
+import { WalletConnectConnector } from "@web3-react/walletconnect-connector"
 
 const connectors = {
     injected: new InjectedConnector({}),
-    // Add other wallet connectors in the future
+    walletConnect: new WalletConnectConnector({
+      rpcUrl: "https://kovan.optimism.io",
+      bridge: "https://bridge.walletconnect.org",
+      qrcode: true,
+     }),
 };
 
 const EthAccount = ({ showNetwork=false, showAccount=false, showDisconnect=true }) => {
@@ -19,9 +24,14 @@ const EthAccount = ({ showNetwork=false, showAccount=false, showDisconnect=true 
       </div>
   }
   else {
-    return <div className={styles.button} onClick={() => {
-        web3React.activate(connectors.injected);
-    }}>Connect Wallet</div>
+    return <div>
+      <div className={styles.buttonct} onClick={() => {web3React.activate(connectors.injected);}}>
+        <img src="/metamask.png" width="48"></img><br></br>Use MetaMask
+      </div>
+      <div className={styles.buttonct} onClick={() => {web3React.activate(connectors.walletConnect);}}>
+        <img src="/wallet-connect.png" width="60"></img><br></br>Use Wallet Connect
+      </div>
+    </div>
   }
 }
 
