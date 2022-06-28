@@ -9,7 +9,7 @@ This project is currently deployed to [Harmony DevNet](https://explorer.ps.hmny.
 
 Link to client app:
 
-<https://fusioncredit.vercel.app/>
+<https://zkgames.vercel.app/>
 
 ## Setup
 
@@ -70,11 +70,16 @@ The client side is deploy to vercel. Environment variables in the `.env.example`
 Here are some screen shots of the running application
 
 ### Initial screen to connect wallet
+<img src="doc/screenshots/connect-wallet.png"/>
 
 ### Adding a new account/address
+<img src="doc/screenshots/add-account.png"/>
 
 ### Creating FusionScore
+<img src="doc/screenshots/create-score.png"/>
 
-### FusionScore information
+### Successful creation information
+<img src="doc/screenshots/create-success.png"/>
 
-### Retrieving FusionScore by address
+### Retrieving score by address
+<img src="doc/screenshots/retrieve-score.png"/>
