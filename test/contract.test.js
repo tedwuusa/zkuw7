@@ -1,7 +1,7 @@
 const { ethers, waffle } = require('hardhat')
 const { expect } = require('chai')
 
-describe('Contract Tests', function () {
+describe('Contract Test (No ZK Verify)', function () {
   async function deploy(contractName, ...args) {
     const Factory = await ethers.getContractFactory(contractName)
     const instance = await Factory.deploy(...args)

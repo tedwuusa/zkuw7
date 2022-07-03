@@ -15,6 +15,9 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 module.exports = {
   solidity: "0.8.4",
   networks: {
+    "hardhat": {
+      chainId: 1337
+    },
     "ethereum-mainnet": {
       url: "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
       accounts: [process.env.DEPLOYER_ADDRESS]

@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   }
  
   // expect req.body to be like {chainId, address, signature}
-  const chainId = ((req.body.chainId == 1666900000) ? 1666700000 : req.body.chainId)
+  const chainId = ([1666900000, 1337].includes(req.body.chainId)) ? 1666700000 : req.body.chainId
   const address = req.body.address
 
   let balanceAmount = 0

@@ -7,11 +7,12 @@ import NetworkAddress from "../components/NetworkAddress"
 import { Contract } from "ethers"
 import FusionCredit from "../public/FusionCredit.json"
 import ScoreCard from "../components/ScoreCard"
+import { genProof } from "../utils/zkproof"
 
 export default function Home() {
   const web3React = useWeb3React()
   const [chains, setChains] = React.useState([]) // list of supported chains to add account / retrieve data from
-  const [scoreTimestamp, setScoreTimestamp] = React.useState(Date.now()) // timestamp used to generate socre
+  const [scoreTimestamp, setScoreTimestamp] = React.useState(Math.floor(Date.now()/1000)) // timestamp used to generate socre
   const [accounts, setAccounts] = React.useState([]) // list of accounts used to generate socre
   const [score, setScore] = React.useState(null) // the calculated score information and ZK proof
   
@@ -44,34 +45,6 @@ export default function Home() {
       }
     }
     return -1
-  }
-
-  function genProof(evalTime, accounts) {
-    const cap300 = (val) => (val > 300) ? 300 : Math.floor(val)
-
-    const scores = accounts.map(account => 
-      cap300((evalTime - account.creationTime) / 3600 / 24 / 2) +
-      cap300(account.transactionCount) + 
-      cap300(account.balanceAmount / 33)
-    )
-
-    const scoreInfo = scores.reduce((acc, curr) => {
-      const score_mapped = 1000 + (1000 - curr); // mapping score to [1000, 2000] in reverse
-      const accumulator_new = Math.floor(acc.accumulator * score_mapped / 1000); // use signal for quadratic limitation
-      const scale_new = acc.scale * 2;
-      return {accumulator: accumulator_new, scale: scale_new}
-    }, {accumulator: 1000, scale: 1})
-
-    const factor = scoreInfo.scale - 1;
-    const mapped = scoreInfo.accumulator - 1000;
-    const score = 1000 - Math.floor(mapped / factor);
-
-    return {
-      score: score,
-      version: 1,
-      timestamp: evalTime,
-      proof: [0,0,0,0,0,0,0,0],
-    }
   }
 
   async function addAccount() {
@@ -134,7 +107,8 @@ export default function Home() {
     console.log(contractAddress)
 
     const signer = web3React.library.getSigner()
-    const proofData = genProof(scoreTimestamp, accounts)
+    const senderAddress = await signer.getAddress()
+    const proofData = await genProof({evalTime: scoreTimestamp, senderAddress, accounts})
     const contract = new Contract(contractAddress, FusionCredit.abi, signer)
 
     try {

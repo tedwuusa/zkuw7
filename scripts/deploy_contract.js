@@ -1,3 +1,4 @@
+require("dotenv")
 const hre = require('hardhat')
 
 async function deploy(contractName, ...args) {
@@ -11,7 +12,8 @@ async function deploy(contractName, ...args) {
 }
 
 async function main() {
-  const verifier = await deploy('FusionScoreV1Verifier')
+  const verifierName = (process.env.NEXT_PUBLIC_MOCK_PROOF == 1) ? 'FusionScoreMockVerifier' : 'FusionScoreV1Verifier'
+  const verifier = await deploy(verifierName)
   const fusionCredit = await deploy('FusionCredit', verifier.address)
 
   return fusionCredit

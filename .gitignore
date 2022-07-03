@@ -27,3 +27,6 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# application
+/public/zk

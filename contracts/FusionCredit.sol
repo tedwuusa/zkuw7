@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
+
+//import "hardhat/console.sol";
 
 interface IVerifier {
     function verifyProof(uint[2] memory a, uint[2][2] memory b, uint[2] memory c, 
-        uint[3] memory input) external view returns (bool r);
+        uint[4] memory input) external view returns (bool r);
 }
 
 contract FusionCredit {
@@ -42,9 +44,9 @@ contract FusionCredit {
         ScoreData memory scoreData = scores[msg.sender];
         require(version >= scoreData.version, "Can't use earlier version");
         require(timestamp > scoreData.timestamp, "Can't use earlier timestamp");
-//        require(timestamp <= block.timestamp, "Can't use future timestamp");
+        //require(timestamp <= block.timestamp, "Can't use future timestamp");
 
-        uint[3] memory input = [score, version, timestamp];
+        uint[4] memory input = [score, version, timestamp, uint(uint160(msg.sender))];
         uint[2] memory a = [proof[0], proof[1]];
         uint[2][2] memory b = [[proof[2], proof[3]], [proof[4], proof[5]]];
         uint[2] memory c = [proof[6], proof[7]];

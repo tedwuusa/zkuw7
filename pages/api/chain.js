@@ -18,6 +18,14 @@ export default function handler(req, res) {
       "fusion_score_contract": "0xc33B93EC3E220A4B6d1BA0a74FDEA23bBf9db099"
     },
     {
+      "name": "hardhat",
+      "chain_id": "1337",
+      "is_testnet": true,
+      "db_schema_name": "chain_eth_mainnet",
+      "label": "Local Hardhat Testnet",
+      "logo_url": "https://www.covalenthq.com/static/images/icons/display-icons/ethereum-eth-logo.png"
+    },    
+    {
       "name": "harmony-mainnet",
       "chain_id": "1666600000",
       "is_testnet": false,
