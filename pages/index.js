@@ -74,7 +74,7 @@ export default function Home() {
       },
       body: JSON.stringify({
         chainId: web3React.chainId,
-        address: web3React.account,
+        chainAddress: web3React.account,
         signature: signature,        
       }),
     })
@@ -96,6 +96,7 @@ export default function Home() {
       creationTime: data.creationTime,
       transactionCount: data.transactionCount,
       balanceAmount: data.balanceAmount,
+      dataChainId: data.chainId,
       dataSig: data.signature,
     }
     const newAccounts = accounts.concat(newAccount)

@@ -10,7 +10,7 @@ describe('Contract Test (No ZK Verify)', function () {
 
   async function fixture() {
     const verifier = await deploy('FusionScoreMockVerifier')
-    const fusionCredit = await deploy('FusionCredit', verifier.address)
+    const fusionCredit = await deploy('FusionCredit', verifier.address, [0, 0])
     return { fusionCredit }
   }
 

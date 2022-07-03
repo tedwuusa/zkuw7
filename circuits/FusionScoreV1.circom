@@ -1,6 +1,8 @@
 pragma circom 2.0.5;
 
 include "../node_modules/circomlib/circuits/comparators.circom";
+include "../node_modules/circomlib/circuits/mimc.circom";
+include "../node_modules/circomlib/circuits/eddsamimc.circom";
 
 // Return input if it is less than max, otherwise return max
 template LimitMax(max) {
@@ -17,28 +19,28 @@ template LimitMax(max) {
 }
 
 // Circuit for integer division
-template IntDiv(n) {
+template IntegerDiv(n) {
     signal input in;
-    signal input denom;
+    signal input divisor;
 
     signal output out;
 
-    out <-- in \ denom;
+    out <-- in \ divisor;
 
     component lbound = GreaterEqThan(n+12);
     lbound.in[0] <== in;
-    lbound.in[1] <== out * denom;
+    lbound.in[1] <== out * divisor;
     lbound.out === 1;
 
     component ubound = LessThan(n+12);
     ubound.in[0] <== in;
-    ubound.in[1] <== (out + 1) * denom;
+    ubound.in[1] <== (out + 1) * divisor;
     ubound.out === 1;
 }
 
 // Combine scores into accumulator by multiplying if account is valid (non zero score)
 // Also tracks the scale to be adjusted at the end if account is valid
-// If account is not valid, previous accumulator and scale is returned
+// If account is not used, previous accumulator and scale is returned
 template CombineScore(n) {
     signal input score; // account credit score in range [0, 1000]
     signal input accumulator;
@@ -49,9 +51,9 @@ template CombineScore(n) {
     signal output scale_out;
 
     var score_mapped = 1000 + (1000 - score); // mapping score to [1000, 2000] in reverse
-    component scaled = IntDiv(n+12);
+    component scaled = IntegerDiv(n+12);
     scaled.in <== accumulator * score_mapped;
-    scaled.denom <== 1000;
+    scaled.divisor <== 1000;
 
     accumulator_out <== scaled.out + (accumulator - scaled.out) * blank;
     scale_out <== scale + scale * (1-blank);
@@ -64,9 +66,9 @@ template GetScore(n) {
 
     signal output score;
 
-    component scaled = IntDiv(n+12);
+    component scaled = IntegerDiv(n+12);
     scaled.in <== accumulator - 1000;
-    scaled.denom <== scale - 1;
+    scaled.divisor <== scale - 1;
     score <== 1000 - scaled.out;
 }
 
@@ -76,9 +78,13 @@ template FusionScoreV1(n) {
 
     signal input evalTime; // Time when score is calculated
     signal input senderAddress; // Address of the sender account
+    signal input publicKey[2]; // Public key of server providing the data
+    signal input chainId[n]; // ChainId of the account, only used for signature validation
+    signal input chainAddress[n]; // Address of the account, only used for signature validation
     signal input creationTime[n]; // Timestamp of account creation
     signal input transactionCount[n]; // Number of transaction in last year
     signal input balanceAmount[n]; // Account balance
+    signal input signature[n][3]; // Signature of data. R8x at 0, R8y at 1, S at 2
 
     signal output score; // Calculated Fusion Score
     signal output version; // Fusion Score Version
@@ -86,6 +92,8 @@ template FusionScoreV1(n) {
     version <== 1;
 
     component blank[n];
+    component msgHash[n];
+    component sigVerify[n];
     component longevity[n];
     component activity[n];
     component equity[n];
@@ -95,24 +103,48 @@ template FusionScoreV1(n) {
     component combine[n];
 
     for (var i=0; i<n; i++) {
+        // check for unused slots
         blank[i] = IsZero();
         blank[i].in <== creationTime[i];
 
-        longevityDiv[i] = IntDiv(n);
+        //calculage message hash
+        msgHash[i] = MultiMiMC7(5, 91);
+        msgHash[i].in[0] <== chainId[i];
+        msgHash[i].in[1] <== chainAddress[i];
+        msgHash[i].in[2] <== creationTime[i];
+        msgHash[i].in[3] <== transactionCount[i];
+        msgHash[i].in[4] <== balanceAmount[i];
+        msgHash[i].k <== 0;
+
+        // check signature
+        sigVerify[i] = EdDSAMiMCVerifier();
+        sigVerify[i].enabled <== 1 - blank[i].out; // only verify if account is not blank
+        sigVerify[i].Ax <== publicKey[0];
+        sigVerify[i].Ay <== publicKey[1];
+        sigVerify[i].R8x <== signature[i][0];
+        sigVerify[i].R8y <== signature[i][1];
+        sigVerify[i].S <== signature[i][2];
+        sigVerify[i].M <== msgHash[i].out;
+
+        // calculate longevity score
+        longevityDiv[i] = IntegerDiv(n);
         longevityDiv[i].in <== evalTime - creationTime[i];
-        longevityDiv[i].denom <== 3600 * 24 * 2;
+        longevityDiv[i].divisor <== 3600 * 24 * 2;
         longevity[i] = LimitMax(300);
         longevity[i].in <== longevityDiv[i].out;
 
+        // calculate activity score
         activity[i] = LimitMax(300);
         activity[i].in <== transactionCount[i];
 
-        equityDiv[i] = IntDiv(n);
+        // calculate equity score
+        equityDiv[i] = IntegerDiv(n);
         equityDiv[i].in <== balanceAmount[i];
-        equityDiv[i].denom <== 33;
+        equityDiv[i].divisor <== 33;
         equity[i] = LimitMax(300);
         equity[i].in <== equityDiv[i].out;
 
+        // calculate total score for account
         accountScore[i] <== longevity[i].out + activity[i].out + equity[i].out;
 
         // log(i);
@@ -121,6 +153,7 @@ template FusionScoreV1(n) {
         // log(equity[i].out);
         // log(accountScore[i]);
 
+        // combine scores from multiple accounts
         combine[i] = CombineScore(n);
         if (i == 0) {
             assert(blank[i].out == 0); // Must have at least one valid account
@@ -137,15 +170,16 @@ template FusionScoreV1(n) {
         }
     }
 
+    // calculate final score
     component score_final = GetScore(n);
     score_final.accumulator <== combine[n-1].accumulator_out;
     score_final.scale <== combine[n-1].scale_out;
     score <== score_final.score;
-
     //log(score);
 
+    // ensure sender address is not changed
     signal dummy;
     dummy <== senderAddress * senderAddress;  
 }
 
-component main {public [evalTime, senderAddress]} = FusionScoreV1(20);
+component main {public [evalTime, senderAddress, publicKey]} = FusionScoreV1(20);

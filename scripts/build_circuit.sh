@@ -5,7 +5,7 @@ OUT_DIR=circuits/artifacts
 CONTRACT_DIR=contracts
 CLIENT_DIR=public/zk
 TEST_DIR=test/inputs
-POWERS_OF_TAU=13
+POWERS_OF_TAU=18
 
 if [ ! -z $1 ]; then
     CIRCUIT=$1

@@ -38,11 +38,17 @@ async function genV1Proof(input) {
   const circuitInput = {
     evalTime: input.evalTime,
     senderAddress: input.senderAddress,
+    publicKey: [process.env.NEXT_PUBLIC_DATA_PUBKEY1, process.env.NEXT_PUBLIC_DATA_PUBKEY2],
+    chainId: input.accounts.map(account => account.dataChainId).concat(filler),
+    chainAddress: input.accounts.map(account => account.address).concat(filler),
     creationTime: input.accounts.map(account => account.creationTime).concat(filler),
     transactionCount: input.accounts.map(account => account.transactionCount).concat(filler),
     balanceAmount: input.accounts.map(account => account.balanceAmount).concat(filler),
+    signature: input.accounts.map(account => account.dataSig).concat(new Array(20-count).fill([0,0,0])),
   }
   //console.log(circuitInput)
+  console.log(JSON.stringify(circuitInput))
+
   const result = await groth16.fullProve(circuitInput,
     "zk/FusionScoreV1.wasm",
     "zk/FusionScoreV1.zkey",

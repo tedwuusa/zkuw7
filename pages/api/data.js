@@ -1,12 +1,14 @@
+import { buildEddsa, buildMimc7 } from "circomlibjs"
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).send({ message: 'Only POST requests allowed' })
     return
   }
  
-  // expect req.body to be like {chainId, address, signature}
+  // expect req.body to be like {chainId, chainAddress, signature}
   const chainId = ([1666900000, 1337].includes(req.body.chainId)) ? 1666700000 : req.body.chainId
-  const address = req.body.address
+  const address = req.body.chainAddress
 
   let balanceAmount = 0
   let transactionCount = 1
@@ -47,13 +49,34 @@ export default async function handler(req, res) {
 
   const result = {
     chainId: chainId,
-    address: address,
+    chainAddress: address,
     creationTime: creationTime,
     transactionCount: transactionCount,
     balanceAmount: balanceAmount,
-    signature: req.body.signature,
   }
+  const signature = await genSignature(result)
+  result.signature = signature
+
   console.log(result)
-  
   res.status(200).json(result)
+}
+
+async function genSignature(data) {
+  const eddsa = await buildEddsa()
+  const mimc7 = await buildMimc7()
+  const F = mimc7.F;
+
+  const input = [
+    data.chainId,
+    BigInt(data.chainAddress),
+    data.creationTime,
+    data.transactionCount,
+    data.balanceAmount,
+  ]
+  
+  const hash = mimc7.multiHash(input)
+  const prvKey = Buffer.from(process.env.EDDSA_PRIV_KEY, "hex")
+  const signature = eddsa.signMiMC(prvKey, hash)
+
+  return [F.toObject(signature.R8[0]).toString(), F.toObject(signature.R8[1]).toString(), signature.S.toString()]
 }

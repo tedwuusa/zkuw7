@@ -1,3 +1,4 @@
+require("dotenv")
 const { ethers, waffle } = require('hardhat')
 const { expect, assert } = require('chai')
 
@@ -12,7 +13,8 @@ describe('ZK Tests', function () {
 
   async function fixture() {
     const verifier = await deploy('FusionScoreV1Verifier')
-    const fusionCredit = await deploy('FusionCredit', verifier.address)
+    const fusionCredit = await deploy('FusionCredit', verifier.address,
+      [process.env.NEXT_PUBLIC_DATA_PUBKEY1, process.env.NEXT_PUBLIC_DATA_PUBKEY2])
     return { verifier, fusionCredit }
   }
 

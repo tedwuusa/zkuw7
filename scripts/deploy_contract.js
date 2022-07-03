@@ -14,7 +14,8 @@ async function deploy(contractName, ...args) {
 async function main() {
   const verifierName = (process.env.NEXT_PUBLIC_MOCK_PROOF == 1) ? 'FusionScoreMockVerifier' : 'FusionScoreV1Verifier'
   const verifier = await deploy(verifierName)
-  const fusionCredit = await deploy('FusionCredit', verifier.address)
+  const fusionCredit = await deploy('FusionCredit', verifier.address, 
+    [process.env.NEXT_PUBLIC_DATA_PUBKEY1, process.env.NEXT_PUBLIC_DATA_PUBKEY2])
 
   return fusionCredit
 }

@@ -5,12 +5,13 @@ pragma solidity ^0.8.4;
 
 interface IVerifier {
     function verifyProof(uint[2] memory a, uint[2][2] memory b, uint[2] memory c, 
-        uint[4] memory input) external view returns (bool r);
+        uint[6] memory input) external view returns (bool r);
 }
 
 contract FusionCredit {
     address owner;
     IVerifier public verifier;
+    uint[2] public pubkey;
     mapping(address => ScoreData) public scores;
 
     struct ScoreData {
@@ -24,13 +25,18 @@ contract FusionCredit {
       _;
    }
 
-    constructor(IVerifier _verifier) {
+    constructor(IVerifier _verifier, uint[2] memory _pubkey) {
         owner = msg.sender;
         verifier = _verifier;
+        pubkey = _pubkey;
     }
 
     function setVerifier(IVerifier _verifier) public onlyOwner {
         verifier = _verifier;
+    }
+
+    function setPubkey(uint[2] memory _pubkey) public onlyOwner {
+        pubkey = _pubkey;
     }
 
     function getScore(address _addr) public view returns(uint score, uint version, uint timestamp) {
@@ -46,7 +52,7 @@ contract FusionCredit {
         require(timestamp > scoreData.timestamp, "Can't use earlier timestamp");
         //require(timestamp <= block.timestamp, "Can't use future timestamp");
 
-        uint[4] memory input = [score, version, timestamp, uint(uint160(msg.sender))];
+        uint[6] memory input = [score, version, timestamp, uint(uint160(msg.sender)), pubkey[0], pubkey[1]];
         uint[2] memory a = [proof[0], proof[1]];
         uint[2][2] memory b = [[proof[2], proof[3]], [proof[4], proof[5]]];
         uint[2] memory c = [proof[6], proof[7]];
