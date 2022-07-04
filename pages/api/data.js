@@ -1,3 +1,4 @@
+import { ethers } from "ethers";
 import { buildEddsa, buildMimc7 } from "circomlibjs"
 
 export default async function handler(req, res) {
@@ -54,11 +55,21 @@ export default async function handler(req, res) {
     transactionCount: transactionCount,
     balanceAmount: balanceAmount,
   }
-  const signature = await genSignature(result)
+
+  // Only generate data signature if account ownership is confirmed
+  let signature = [0, 0, 0]
+  if (await verifySignature(address, req.body.signature)) 
+    signature = await genSignature(result)
   result.signature = signature
 
   console.log(result)
   res.status(200).json(result)
+}
+
+async function verifySignature(address, signature) {
+  const message = "Fusion Credit: Sign this message to prove you own this account!"
+  const signer = await ethers.utils.verifyMessage(message, signature)
+  return address == signer
 }
 
 async function genSignature(data) {
