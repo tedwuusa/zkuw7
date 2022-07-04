@@ -107,12 +107,18 @@ export default function Home() {
           signature: signature,        
         }),
       })
-      data = await response.json()
-      if (data.error) {
-        setPopupState({msg: "Unable to retrieve data for account", showClose: true})
-        console.log(data.error)
-        return
+      if (response.status == 200) {
+        data = await response.json()
+        if (data.error) {
+          setPopupState({msg: "Unable to retrieve data for account", showClose: true})
+          console.log(data.error)
+          return
+        }
+      } else {
+        setPopupState({msg: "Unable to retrieve data: " + response.text(), showClose: true})
+        console.log(response)  
       }
+
     } catch (err) {
       setPopupState({msg: "Retrieving data for account failed", showClose: true})
       console.log(err)
