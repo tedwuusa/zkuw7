@@ -161,7 +161,7 @@
 .formfield {
   padding: 5px;
   font-size: 1.2em;
-  width: 300px;
+  width: 500px;
 }
 
 .formfield::placeholder {
@@ -259,4 +259,8 @@
 .popupcenter {
   display: flex;
   justify-content: center;
+}
+
+.errcolor {
+  color: salmon;
 }

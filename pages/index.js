@@ -21,7 +21,6 @@ export default function Home() {
   const [showPopup, setShowPopup] = React.useState(false) // show the popup window
 
   const currChainIndex = findChain(web3React.chainId)
-  const currChainName = (currChainIndex == -1) ? "Unsupported! Please select another Chain" : chains[currChainIndex].label
   const currAccountIndex = findAccount()
 
   React.useEffect(() => {
@@ -49,6 +48,22 @@ export default function Home() {
       }
     }
     return -1
+  }
+
+  function isValidChain() {
+    if (currChainIndex == -1)
+      return false    
+    if (process.env.NEXT_PUBLIC_PROD_CHAIN_ONLY == 1 && chains[currChainIndex].is_testnet)
+      return false
+    return true
+  }
+
+  function getChainName() {
+    if (currChainIndex == -1)
+      return <span className={styles.errcolor}>Unsupported chain! Please select another with your wallet!</span>
+    if (process.env.NEXT_PUBLIC_PROD_CHAIN_ONLY == 1 && chains[currChainIndex].is_testnet)
+      return <span className={styles.errcolor}>This is a test chain. Please select a production chain!</span>
+    return <span className={styles.accounttgt}>{chains[currChainIndex].label}</span>
   }
 
   async function addAccount() {
@@ -203,21 +218,21 @@ export default function Home() {
             <NetworkAddress key={"C"+account.chainId+"A"+account.address} account={account} />
           )}
 
-          {currAccountIndex != -1 ?
+          {web3React.chainId == process.env.NEXT_PUBLIC_FUSION_CREDIT_CHAIN ?
             <div className={styles.button} onClick={makeFusion}>Create Fusion Score</div> :
             accounts.length > 0 ?
-            <p>To create Fusion Score, select one of the added accounts or add current account<br/><br/></p> :
+            <p>To create Fusion Score, select or add an account on a chain with Fusion Credit smart contract<br/><br/></p> :
             <p></p>
           }
 
           {currAccountIndex == -1 && 
             <>
               <div>
-                <p>Current Account: {currChainName}</p>
-                <p>Address: {web3React.account}</p>
+                <p>Network within Wallet: {getChainName()}</p>
+                <p>Address within Wallet: <span className={styles.accounttgt}>{web3React.account}</span></p>
               </div>
               <div>
-                {currChainIndex != -1 &&
+                {isValidChain() &&
                   <button className={styles.button} onClick={addAccount}>Add This Account</button>
                 }
               </div>

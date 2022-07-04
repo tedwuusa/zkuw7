@@ -22,9 +22,9 @@ export default async function handler(req, res) {
 		let data = await res.json()
     if (!data.error) {
       const balances = data.data.items.map(item => 
-        Number(BigInt(item.balance)) / Number(BigInt(10 ** item.contract_decimals)) * item.quote
+        parseFloat(item.balance) / Number(10 ** item.contract_decimals) * item.quote
       )
-      balanceAmount = balances.reduce((a, b) => a + b, 0)
+      balanceAmount = Math.floor(balances.reduce((a, b) => a + b, 0))
     } else {
       console.log(data)
     }
