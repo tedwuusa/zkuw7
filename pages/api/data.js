@@ -13,7 +13,7 @@ export default async function handler(req, res) {
 
   let balanceAmount = 0
   let transactionCount = 1
-  let creationTime = Date.now() - 3600 * 24 * 2
+  let creationTime = Math.floor(Date.now()/1000)
   try {
     let url = `https://api.covalenthq.com/v1/${chainId}/address/${address}/balances_v2/`
     console.log(`Fetching balance data from ${url}`)
@@ -38,16 +38,18 @@ export default async function handler(req, res) {
     data = await res.json()
     if (!data.error) {
       transactionCount = data.data.items.length
-      const ts = data.data.items[data.data.items.length-1].block_signed_at
-      creationTime = Math.floor(new Date(ts).getTime() / 1000)
+      if (transactionCount > 0) {
+        const ts = data.data.items[data.data.items.length-1].block_signed_at
+        creationTime = Math.floor(new Date(ts).getTime() / 1000)
+      } 
     } else {
       console.log(data)
     }
 
 	} catch (err) {
 		console.log(err);
-    // res.status(500).send({ message: err })
-    // return
+    res.status(500).send({ message: err })
+    return
 	}
 
   const result = {
@@ -58,13 +60,19 @@ export default async function handler(req, res) {
     balanceAmount: balanceAmount,
   }
 
-  // Only generate data signature if account ownership is confirmed
-  let signature = [0, 0, 0]
-  if (await verifySignature(address, req.body.signature)) 
-    signature = await genSignature(result)
-  result.signature = signature
-
+  console.log("Data Retrieved:")
   console.log(result)
+
+  // Only generate data signature if account ownership is confirmed
+  console.log("Checking account ownership signature")
+  let signature = [0, 0, 0]
+  if (await verifySignature(address, req.body.signature)) {
+    console.log("Creating data signature")
+    signature = await genSignature(result)
+  }
+  console.log(signature)
+
+  result.signature = signature
   res.status(200).json(result)
 }
 
