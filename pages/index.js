@@ -167,8 +167,8 @@ export default function Home() {
     try {
       const tx = await contract.setScore(proofData.score, proofData.version, proofData.timestamp, proofData.proof)
       console.log(`setScore transaction submitted with hash ${tx.hash}`)
-      setPopupState({msg: "Transaction submitted, waiting for it to be committed", showClose: false})
-      await tx.wait();
+      setPopupState({msg: "Transaction submitted, score will be on chain once committed", showClose: true})
+      //await tx.wait();
       setScore({
         score: proofData.score,
         version: proofData.version,
@@ -181,7 +181,6 @@ export default function Home() {
       console.log(err)
       return
     }
-    setShowPopup(false)
   }
 
   return (
