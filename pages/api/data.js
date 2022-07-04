@@ -16,6 +16,7 @@ export default async function handler(req, res) {
   let creationTime = Date.now() - 3600 * 24 * 2
   try {
     let url = `https://api.covalenthq.com/v1/${chainId}/address/${address}/balances_v2/`
+    console.log(`Fetching balance data from ${url}`)
 		let res = await fetch(url, {
       headers: {'Authorization': 'Basic '+btoa(process.env.COVALENT_APIKEY + ':')},
     })
@@ -30,6 +31,7 @@ export default async function handler(req, res) {
     }
 		
     url = `https://api.covalenthq.com/v1/${chainId}/address/${address}/transactions_v2/`
+    console.log(`Fetching transaction data from ${url}`)
 		res = await fetch(url, {
       headers: {'Authorization': 'Basic '+btoa(process.env.COVALENT_APIKEY + ':')},
     })

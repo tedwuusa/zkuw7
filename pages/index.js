@@ -218,7 +218,7 @@ export default function Home() {
             <NetworkAddress key={"C"+account.chainId+"A"+account.address} account={account} />
           )}
 
-          {web3React.chainId == process.env.NEXT_PUBLIC_FUSION_CREDIT_CHAIN ?
+          {currAccountIndex != -1 && web3React.chainId == process.env.NEXT_PUBLIC_FUSION_CREDIT_CHAIN ?
             <div className={styles.button} onClick={makeFusion}>Create Fusion Score</div> :
             accounts.length > 0 ?
             <p>To create Fusion Score, select or add an account on a chain with Fusion Credit smart contract<br/><br/></p> :

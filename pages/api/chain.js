@@ -1,4 +1,5 @@
 export default function handler(req, res) {
+  console.log(`Returning chain data`)
   res.status(200).json([
     {
       "name": "eth-mainnet",
