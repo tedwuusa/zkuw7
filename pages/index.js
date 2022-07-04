@@ -1,12 +1,14 @@
 import Head from "next/head"
 import React from "react"
-import { useWeb3React } from "@web3-react/core"
 import styles from "../styles/Home.module.css"
 import EthAccount from "../components/EthAccount"
 import NetworkAddress from "../components/NetworkAddress"
-import { Contract } from "ethers"
-import FusionCredit from "../public/FusionCredit.json"
 import ScoreCard from "../components/ScoreCard"
+import MsgPopup from "../components/MsgPopup"
+
+import FusionCredit from "../public/FusionCredit.json"
+import { useWeb3React } from "@web3-react/core"
+import { Contract } from "ethers"
 import { genProof } from "../utils/zkproof"
 
 export default function Home() {
@@ -15,7 +17,9 @@ export default function Home() {
   const [scoreTimestamp, setScoreTimestamp] = React.useState(Math.floor(Date.now()/1000)) // timestamp used to generate socre
   const [accounts, setAccounts] = React.useState([]) // list of accounts used to generate socre
   const [score, setScore] = React.useState(null) // the calculated score information and ZK proof
-  
+  const [popupState, setPopupState] = React.useState({msg:"", showClose: false}) // show the popup window
+  const [showPopup, setShowPopup] = React.useState(false) // show the popup window
+
   const currChainIndex = findChain(web3React.chainId)
   const currChainName = (currChainIndex == -1) ? "Unsupported! Please select another Chain" : chains[currChainIndex].label
   const currAccountIndex = findAccount()
@@ -48,42 +52,58 @@ export default function Home() {
   }
 
   async function addAccount() {
-    if (currAccountIndex != -1) // an existing account is selected
+    if (currAccountIndex != -1) { // an existing account is selected
+      setPopupState({msg: "This account is already added!", showClose: true})
+      setShowPopup(true)
       return
+    }
     const chainIndex = findChain(web3React.chainId)
-    if (chainIndex == -1) // chain not supported
+    if (chainIndex == -1) { // chain not supported
+      setPopupState({msg: "This blockchain is not supported", showClose: true})
+      setShowPopup(true)
       return
+    }
 
-    // get signature from the user to prove ownerhsip of the account
+    // get signature from the user to prove ownerhsip of the account    
+    setPopupState({msg: "Please sign the message to prove you own this account", showClose: false})
+    setShowPopup(true)
     const signer = web3React.library.getSigner()
     let signature;
     try {
       signature = await signer.signMessage("Fusion Credit: Sign this message to prove you own this account!")
     } catch (err) {
-      // TODO: Add user notification UI
-      console.log("Message not signed successfully.")
+      setPopupState({msg: "Signing of message not successful", showClose: true})
       console.log(err)
       return     
     }
 
     // Fetch data from server side for account
-    const response = await fetch('/api/data', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        chainId: web3React.chainId,
-        chainAddress: web3React.account,
-        signature: signature,        
-      }),
-    })
-    const data = await response.json()
-    if (data.error) {
-      // TODO: Add user notification UI
-      console.log(data.error)
-      return
+    setPopupState({msg: "Retrieving account data...", showClose: false})
+    let data
+    try {
+      const response = await fetch('/api/data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chainId: web3React.chainId,
+          chainAddress: web3React.account,
+          signature: signature,        
+        }),
+      })
+      data = await response.json()
+      if (data.error) {
+        setPopupState({msg: "Unable to retrieve data for account", showClose: true})
+        console.log(data.error)
+        return
+      }
+    } catch (err) {
+      setPopupState({msg: "Retrieving data for account failed", showClose: true})
+      console.log(err)
+      return     
     }
+
 
     // Add account to list
     const newAccount = {
@@ -101,20 +121,32 @@ export default function Home() {
     }
     const newAccounts = accounts.concat(newAccount)
     setAccounts(newAccounts)
+
+    setShowPopup(false)
   }
 
   async function makeFusion() {
-    const contractAddress = process.env.NEXT_PUBLIC_FUSION_CREDIT_CONTRACT
-    console.log(contractAddress)
-
+    // Generate zero knowledge proof
+    setPopupState({msg: "Generating zero knowledge proof (this can take 10-15 seconds)", showClose: false})
+    setShowPopup(true)
     const signer = web3React.library.getSigner()
-    const senderAddress = await signer.getAddress()
-    const proofData = await genProof({evalTime: scoreTimestamp, senderAddress, accounts})
-    const contract = new Contract(contractAddress, FusionCredit.abi, signer)
+    let proofData
+    try {
+      const senderAddress = await signer.getAddress()
+      proofData = await genProof({evalTime: scoreTimestamp, senderAddress, accounts})
+    } catch (err) {
+      setPopupState({msg: "Unable to generate proof, data may have been tempered", showClose: true})
+      console.log(err)
+      return
+    }
 
+    setPopupState({msg: "Generating transaction, please sign with wallet when ready", showClose: false})
+    const contractAddress = process.env.NEXT_PUBLIC_FUSION_CREDIT_CONTRACT
+    const contract = new Contract(contractAddress, FusionCredit.abi, signer)
     try {
       const tx = await contract.setScore(proofData.score, proofData.version, proofData.timestamp, proofData.proof)
       console.log(`setScore transaction submitted with hash ${tx.hash}`)
+      setPopupState({msg: "Transaction submitted, waiting for it to be committed", showClose: false})
       await tx.wait();
       setScore({
         score: proofData.score,
@@ -124,10 +156,11 @@ export default function Home() {
       })
     }
     catch (err) {
-      // TODO: Add user notification UI
+      setPopupState({msg: "Unable to set Fusion Score", showClose: true})
       console.log(err)
       return
     }
+    setShowPopup(false)
   }
 
   return (
@@ -155,6 +188,12 @@ export default function Home() {
         { score && <>
           <div className={styles.resulttitle}>Your Fusion Score is created successfully</div>
           <ScoreCard score={score}/>
+          <button className={styles.button} onClick={() => {
+            setScoreTimestamp(Math.floor(Date.now()/1000))
+            setAccounts([])
+            setScore(null)
+            web3React.deactivate()
+            }}>Start Over</button>
         </>}
 
         { web3React.active && score === null && <>
@@ -186,6 +225,7 @@ export default function Home() {
           }
         </>}
       </main>
+      { showPopup && <MsgPopup popupState={popupState} onClose={() => setShowPopup(false)} /> }
     </div>
   )
 }
