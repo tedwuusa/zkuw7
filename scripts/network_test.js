@@ -1,5 +1,5 @@
 // This script is similar to unit test, except it can be run on any network
-// npx hardhat run scripts/network_test.js --network <network>
+// npx hardhat run scripts/network_test.js --network localhost
 
 require("dotenv")
 const hre = require("hardhat")

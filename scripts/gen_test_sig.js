@@ -17,6 +17,7 @@ async function gen() {
   const mimc7 = await buildMimc7()
   const F = mimc7.F
 
+  data = require("../test/inputs/input3.json")
   // const input = [
   //   1337,
   //   BigInt("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"),
@@ -24,44 +25,69 @@ async function gen() {
   //   100,
   //   330,
   // ]
-  const input = [
-    42,
-    BigInt("0x70997970C51812dc3A010C7d01b50e0d17dc79C8"),
-    BigInt("1639362240"),
-    999,
-    1000,
-  ]
+  // const input = [
+  //   42,
+  //   BigInt("0x70997970C51812dc3A010C7d01b50e0d17dc79C8"),
+  //   BigInt("1639362240"),
+  //   999,
+  //   1000,
+  // ]
 
-  const hash = mimc7.multiHash(input)
-  //const hash = F.fromObject(BigInt("4693883787057640897410274470539056011455290739552735156139509029429449214218"))
-  console.log("msg = " + F.toObject(hash).toString())
+  let sig = []
+  for (let i = 0; i < 20; i++) {
+    if (data.creationTime[i] == 0) {
+      sig = sig.concat([[0, 0, 0]])
+      continue
+    }
 
-  const prvKey = Buffer.from(process.env.EDDSA_PRIV_KEY, "hex")
+    console.log("Item: " + i)
+    const input = [
+      data.chainId[i],
+      BigInt(data.chainAddress[i]),
+      data.creationTime[i],
+      data.transactionCount[i],
+      data.balanceAmount[i],
+    ]
+    const result = await gen1(input)
+    sig = sig.concat([result])
+  }
+  console.log(JSON.stringify(sig, null, 2))
 
-  const pubKey = eddsa.prv2pub(prvKey)
-  console.log('pubKey = ["' + F.toObject(pubKey[0]).toString() + '",\n    "' + F.toObject(pubKey[1]).toString() + '"]')
+  async function gen1(input) {
+    const hash = mimc7.multiHash(input)
+    //const hash = F.fromObject(BigInt("4693883787057640897410274470539056011455290739552735156139509029429449214218"))
+    console.log("msg = " + F.toObject(hash).toString())
+  
+    const prvKey = Buffer.from(process.env.EDDSA_PRIV_KEY, "hex")
+  
+    const pubKey = eddsa.prv2pub(prvKey)
+    console.log('pubKey = ["' + F.toObject(pubKey[0]).toString() + '",\n    "' + F.toObject(pubKey[1]).toString() + '"]')
+  
+    const signature = eddsa.signMiMC(prvKey, hash)
+    console.log('signature = ["' + F.toObject(signature.R8[0]).toString() + '",\n    "' + F.toObject(signature.R8[1]).toString() + 
+      '",\n    "' + signature.S.toString() + '"]')
+  
+    // Run through verify javascript
+    const result = eddsa.verifyMiMC(hash, signature, pubKey)
+    console.log("JS result = " + result)
+  
+    // Run through verify circuit
+    const circuit = await wasm_tester("node_modules/circomlib/test/circuits/eddsamimc_test.circom");
+    const w = await circuit.calculateWitness({
+      enabled: 1,
+      Ax: F.toObject(pubKey[0]),
+      Ay: F.toObject(pubKey[1]),
+      R8x: F.toObject(signature.R8[0]),
+      R8y: F.toObject(signature.R8[1]),
+      S: signature.S,
+      M: F.toObject(hash)
+    }, true)
+    await circuit.checkConstraints(w)
+    console.log("WASM result = true") // previous statement will through exception on failure
 
-  const signature = eddsa.signMiMC(prvKey, hash)
-  console.log('signature = ["' + F.toObject(signature.R8[0]).toString() + '",\n    "' + F.toObject(signature.R8[1]).toString() + 
-    '",\n    "' + signature.S.toString() + '"]')
+    return [F.toObject(signature.R8[0]), F.toObject(signature.R8[1]), signature.S]
+  }
 
-  // Run through verify javascript
-  const result = eddsa.verifyMiMC(hash, signature, pubKey)
-  console.log("JS result = " + result)
-
-  // Run through verify circuit
-  const circuit = await wasm_tester("node_modules/circomlib/test/circuits/eddsamimc_test.circom");
-  const w = await circuit.calculateWitness({
-    enabled: 1,
-    Ax: F.toObject(pubKey[0]),
-    Ay: F.toObject(pubKey[1]),
-    R8x: F.toObject(signature.R8[0]),
-    R8y: F.toObject(signature.R8[1]),
-    S: signature.S,
-    M: F.toObject(hash)
-  }, true)
-  await circuit.checkConstraints(w)
-  console.log("WASM result = true") // previous statement will through exception on failure
 }
 
 gen()

@@ -5,11 +5,11 @@ Fusion Credit creates a FusionScore that will represent a universal reputation s
 
 FusionScore is based on data from multiple addresses and chains while keeping the account information private. Digital signatures are used to ensure account ownership, and zero knowledge proof is used to hide the account information and ensure the credit score calculation is done correctly. 
 
-This project is currently deployed to [Harmony DevNet](https://explorer.ps.hmny.io/) and the frontend is hosted on [Vercel](https://vercel.com/)
+This project is currently deployed to [Polygon Mainnet](https://polygonscan.com/) and the frontend is hosted on [Vercel](https://vercel.com/)
 
 Link to client app:
 
-<https://zkgames.vercel.app/>
+<https://fusion.credit/>
 
 ## Setup
 
@@ -27,7 +27,7 @@ npm run compile
 
 ### To deploy smart contract
 ```
-npm run deploy-harmony-dev
+npm run deploy-polygon-main
 ```
 
 ## Project Structure
